@@ -5,9 +5,11 @@ import Pipe from './classes/Pipe.js';
 {
   let y;
   let face;
-  let pipe;
+  const pipes = [];
 
-  const checkHit = () => {
+  let index = 0;
+
+  const checkHit = (pipe) => {
     if(face.x <  pipe.x + 30 && face.x + 30 > pipe.x) {
       if(face.y < 200 || face.y > 300){
         console.log('check');
@@ -20,6 +22,12 @@ import Pipe from './classes/Pipe.js';
     }
 
   }
+  
+  const addPipe = () => {
+    if(index % 273 === 0){
+      pipes.push(new Pipe());
+    }
+  }
 
   const init = () => {
 
@@ -28,15 +36,23 @@ import Pipe from './classes/Pipe.js';
       y = 200;
       //fill('red') 
       face = new Face(200, 200);
-      pipe = new Pipe();
+      pipes.push(new Pipe());
     }
 
     window.draw = () => {
-      pipe.show();
-      pipe.update();
+
       face.update();
       face.show();
-      checkHit(face.x, pipe.x);       
+      //loop pipes
+       
+      index ++;     
+      for(let i = 0; i <= pipes.length - 1; i++){
+        pipes[i].show();
+        pipes[i].update();
+          checkHit(pipes[i]); 
+      }
+
+      addPipe();
     }
 
     window.keyPressed = () => {

@@ -1,6 +1,6 @@
 class Pipe {
   constructor() {
-    this.x = 500;
+    this.x = width ;
 
   }
 
