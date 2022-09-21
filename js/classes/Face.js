@@ -6,24 +6,26 @@ class Face {
 
     this.color = color;
 
-    this.gravity = 0.1;
-    this.velocity = 0;
+    this.gravity = 1;
+
     this.lift = -12;
   }
 
-  display() {
-    strokeWeight(3);
-    stroke(this.color);
+  show() {
     fill(this.color);
     rect(this.x, this.y, 20, 20)
   }
 
   update() {
-    this.velocity += this.gravity;
-    this.y += this.velocity;
-    
-    
-  }
+
+    if(this.y < 250) {
+      this.y = this.y + this.gravity;
+      //this.y = y;
+      console.log(this.y)
+    }    
+  } 
+
+
 }
 
 export default Face

@@ -2,25 +2,27 @@ import Face from './classes/Face.js';
 
 
 {
+  let y;
+  let face;
 
-
-
-  
   const init = () => {
-    let face;
+
     window.setup = () => {
       createCanvas(400,400);
-      face = new Face('red',width/2, height/2);
+      y = 200;
+      //fill('red') 
+      face = new Face('red', 100, 100)
     }
 
     window.draw = () => {
-      face.display();
-      face.update();
+      face.show();
+      //rect(100, y, 20, 20)
       
+      //y = y + 1;
+      face.update()
     }
-
   }
 
-  init();
-}
+  init()
 
+}
