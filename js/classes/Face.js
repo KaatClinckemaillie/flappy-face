@@ -1,30 +1,44 @@
 class Face {
   
-  constructor(color, x, y) {
+  constructor(x, y) {
     this.y = y;
     this.x = x;
 
-    this.color = color;
 
-    this.gravity = 1;
 
-    this.lift = -12;
+    this.gravity = 0.1;
+    this.velocity = 0;
+    this.lift = -5; 
+      
   }
 
   show() {
-    fill(this.color);
-    rect(this.x, this.y, 20, 20)
+
+    rect(this.x, this.y, 30, 30)
+
   }
 
   update() {
+    this.velocity += this.gravity;
+    this.y += this.velocity;
 
-    if(this.y < 250) {
-      this.y = this.y + this.gravity;
-      //this.y = y;
-      console.log(this.y)
-    }    
+    if(this.y > 400) {
+      this.y = 400;
+      this.velocity = 0; 
+    }
+    if(this.y < 80) {
+      this.y = 80;
+      this.velocity = 0;
+    }
   } 
 
+  up() {
+    this.velocity += this.lift;
+    console.log(this.y)
+  }
+  hit() {
+    fill('red')
+  }
 
 }
 
