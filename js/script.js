@@ -3,17 +3,20 @@ import Face from './classes/Face.js';
 
 {
 
-  const FaceImg = new Face('red', 10, 10);
 
+
+  
   const init = () => {
+    let face;
     window.setup = () => {
       createCanvas(400,400);
-      FaceImg.draw();
+      face = new Face('red',width/2, height/2);
     }
 
     window.draw = () => {
+      face.display();
+      face.update();
       
-      FaceImg.update()
     }
 
   }
