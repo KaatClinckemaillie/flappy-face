@@ -6,22 +6,12 @@ import Pipe from './classes/Pipe.js';
   let y;
   let face;
   const pipes = [];
-
+  const canvasWidth = 640;
+  const canvasHeight = 480;
+  let score = 0;
   let index = 0;
 
-  const checkHit = (pipe) => {
-    if(face.x <  pipe.x + 30 && face.x + 30 > pipe.x) {
-      if(face.y < 200 || face.y > 300){
-        console.log('check');
-        fill('red')
-      }else {
-        fill('green')
-      }
-    }else {
-      fill('white')
-    }
 
-  }
   
   const addPipe = () => {
     if(index % 273 === 0){
@@ -29,18 +19,28 @@ import Pipe from './classes/Pipe.js';
     }
   }
 
+  const checkScore = (pipe) => {
+    if(pipe.score) {
+      score ++;     
+      console.log(`score: ${score}`);
+    }
+    if(pipe.gameOver){
+      noLoop();
+    }
+  }
+
   const init = () => {
 
     window.setup = () => {
-      createCanvas(640,480);
+      createCanvas(canvasWidth,canvasHeight);
       y = 200;
-      //fill('red') 
-      face = new Face(200, 200);
+      face = new Face();
       pipes.push(new Pipe());
     }
 
     window.draw = () => {
 
+      clear();
       face.update();
       face.show();
       //loop pipes
@@ -49,10 +49,15 @@ import Pipe from './classes/Pipe.js';
       for(let i = 0; i <= pipes.length - 1; i++){
         pipes[i].show();
         pipes[i].update();
-          checkHit(pipes[i]); 
+        pipes[i].checkHit(face);
+        checkScore(pipes[i]);
       }
 
+
       addPipe();
+
+
+
     }
 
     window.keyPressed = () => {

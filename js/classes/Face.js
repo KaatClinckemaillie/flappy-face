@@ -1,20 +1,21 @@
 class Face {
   
-  constructor(x, y) {
-    this.y = y;
-    this.x = x;
+  constructor() {
+    this.y = 200;
+    this.x = 200;
 
-
+    this.canvasHeight = 480;
 
     this.gravity = 0.1;
     this.velocity = 0;
     this.lift = -5; 
+    this.size = 30;
       
   }
 
   show() {
 
-    rect(this.x, this.y, 30, 30)
+    rect(this.x, this.y, this.size, this.size)
 
   }
 
@@ -22,19 +23,18 @@ class Face {
     this.velocity += this.gravity;
     this.y += this.velocity;
 
-    if(this.y > 400) {
-      this.y = 400;
+    if(this.y > this.canvasHeight - this.size) {
+      this.y = this.canvasHeight - this.size;
       this.velocity = 0; 
     }
-    if(this.y < 80) {
-      this.y = 80;
+    if(this.y < 0) {
+      this.y = 0;
       this.velocity = 0;
     }
   } 
 
   up() {
     this.velocity += this.lift;
-    console.log(this.y)
   }
   hit() {
     fill('red')

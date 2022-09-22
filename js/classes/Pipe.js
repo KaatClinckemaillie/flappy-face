@@ -1,16 +1,21 @@
 import {random} from '../functions/lib.js'
 
 class Pipe {
-  constructor() {
+  constructor(canvasHeight) {
     this.x = width ;
-    this.space = 150;
-    this.stop = random(50, 300)
 
+    this.space = 150;
+    this.stop = random(50, 300);
+
+    this.canvasHeight = 480;
+    
+    this.gameOver = false;
+    this.score = false;
   }
 
   show() {
     rect(this.x, 0, 30, this.stop);
-    rect(this.x, this.stop + this.space, 30, 480 - (this.stop + this.space));  
+    rect(this.x, this.stop + this.space, 30, this.canvasHeight - (this.stop + this.space));  
   }
 
   update() {
@@ -18,7 +23,26 @@ class Pipe {
 
   }
 
+  checkHit(face) {
+    
+    if(face.x <  this.x + 30 && face.x + 30 > this.x) {
+      if(face.y > this.stop + this.space || face.y < this.stop){
+        fill('red');
+        this.gameOver = true;
+      }else   {
+        fill('red');
+      }
+    } else if(face.x === this.x + 30){
+        this.score = true;
+    } else {
+      fill('white');
+      this.score = false;
+    } 
+
+    }   
+  }
+
   
-}
+
 
 export default Pipe 
