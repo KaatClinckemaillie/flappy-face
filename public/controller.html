@@ -7,13 +7,15 @@
   <title>Controller Flappy Face</title>
 </head>
 <body>
+  <video id="video" autoplay playsinline></video>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     {
 
     let socket, targetSocketId;
+    const $video = document.getElementById('video');
 
-    const init = () => {
+    const init = async () => {
       targetSocketId = getUrlParameter(`id`);
       if (!targetSocketId) {
         alert(`Missing target ID in querystring`);
@@ -24,8 +26,16 @@
         console.log(`Connected: ${socket.id}`);
       });
 
+      const constraints = {
+        audio: false,
+        video: true,
+      }
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      $video.srcObject = stream;
+
       window.addEventListener('click', e => handleClick(e))
       window.addEventListener('touchend', e => handleTouch(e))
+      //window.addEventListener('devicemotion', e => handleTouch(e))
     };
 
     const handleClick = (e) => {
@@ -37,6 +47,12 @@
       e.preventDefault();
       socket.emit(`click`, 'yes!');
     }
+
+/*     const handleDeviceMotion = (e) => {
+      e.preventDefault();
+      console.log(e)
+      //socket.emit(`click`, 'yes!');
+    } */
 
     const getUrlParameter = name => {
       name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
