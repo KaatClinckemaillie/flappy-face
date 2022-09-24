@@ -8,7 +8,7 @@ class Face {
 
     this.gravity = 0.1;
     this.velocity = 0;
-    this.lift = -5; 
+    this.lift = -3; 
     this.size = 30;
       
   }

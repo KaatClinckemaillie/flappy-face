@@ -42,7 +42,8 @@ import Pipe from './classes/Pipe.js';
     socket = io.connect(`/`);
     socket.on(`connect`, () => {
       console.log(`Connected: ${socket.id}`);
-      let url = `${new URL(`/controller.html?id=${socket.id}`, window.location)}`;
+      //let url = `${new URL(`/controller.html?id=${socket.id}`, window.location)}`;
+      const url = `${window.location}/controller.html?id=${socket.id}`
       $url.textContent = url;
     });
 

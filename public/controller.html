@@ -25,9 +25,15 @@
       });
 
       window.addEventListener('click', e => handleClick(e))
+      window.addEventListener('touchend', e => handleTouch(e))
     };
 
     const handleClick = (e) => {
+      e.preventDefault();
+      socket.emit(`click`, 'yes!');
+    }
+
+    const handleTouch = (e) => {
       e.preventDefault();
       socket.emit(`click`, 'yes!');
     }
