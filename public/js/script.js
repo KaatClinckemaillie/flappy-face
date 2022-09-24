@@ -11,7 +11,8 @@ import Pipe from './classes/Pipe.js';
   let score = 0;
   let index = 0;
 
-
+  let socket;
+  const $url = document.querySelector('.url');
   
   const addPipe = () => {
     if(index % 273 === 0){
@@ -29,7 +30,33 @@ import Pipe from './classes/Pipe.js';
     }
   }
 
+/*   const handleClick = e => {
+    e.preventDefault();
+    if(socket.connected) {
+      socket.emit(`click`, 'yes!')
+    }
+  } */
+
   const init = () => {
+
+    socket = io.connect(`/`);
+    socket.on(`connect`, () => {
+      console.log(`Connected: ${socket.id}`);
+      let url = `${new URL(`/controller.html?id=${socket.id}`, window.location)}`;
+      $url.textContent = url;
+    });
+
+    socket.on(`update`, data => {
+      console.log('update')
+
+    })
+
+    socket.on(`click`, click => {
+      console.log(`clicked: ${click}`);
+      face.up();
+    })
+
+    //window.addEventListener('click', e => handleClick(e))
 
     window.setup = () => {
       createCanvas(canvasWidth,canvasHeight);
