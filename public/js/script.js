@@ -11,8 +11,16 @@ import Pipe from './classes/Pipe.js';
   let score = 0;
   let index = 0;
 
-  let socket;
+  let socket, peerConnection;
+
   const $url = document.querySelector('.url');
+  const $otherCamera = document.getElementById('otherCamera');
+  
+  const servers = {
+    iceServers: [{
+      urls: `stun:stun.l.google.com:19302`
+    }]
+  };
   
   const addPipe = () => {
     if(index % 273 === 0){
@@ -30,34 +38,63 @@ import Pipe from './classes/Pipe.js';
     }
   }
 
-/*   const handleClick = e => {
-    e.preventDefault();
-    if(socket.connected) {
-      socket.emit(`click`, 'yes!')
-    }
-  } */
 
-  const init = () => {
+  const initSocket = () => {
 
     socket = io.connect(`/`);
     socket.on(`connect`, () => {
       console.log(`Connected: ${socket.id}`);
-      //let url = `${new URL(`/controller.html?id=${socket.id}`, window.location)}`;
       const url = `${window.location}/controller.html?id=${socket.id}`
       $url.textContent = url;
     });
+    socket.on('peerOffer', (myId, offer, peerId) => {
+      console.log(`Received peerOffer from ${peerId}`);
+      answerPeerOffer(myId, offer, peerId);
+    });
+    socket.on('peerIce', async (myId, candidate, peerId) => {
+      console.log(`Received peerIce from ${peerId}`, candidate);
+      await handlePeerIce(myId, candidate, peerId);
+    });
 
-    socket.on(`update`, data => {
+/*     socket.on(`update`, data => {
       console.log('update')
 
-    })
+    }) */
 
     socket.on(`click`, click => {
       console.log(`clicked: ${click}`);
       face.up();
     })
 
-    //window.addEventListener('click', e => handleClick(e))
+
+  }
+
+  const answerPeerOffer = async (myId, offer, peerId) => {
+    peerConnection = new RTCPeerConnection(servers);
+    peerConnection.onicecandidate = (e) => {
+      console.log('ice candidate', e.candidate);
+      socket.emit('peerIce', peerId, e.candidate);
+    };
+    peerConnection.ontrack = (e) => {
+      console.log('ontrack');
+      $otherCamera.srcObject = e.streams[0];
+    };
+    await peerConnection.setRemoteDescription(offer);
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    socket.emit(`peerAnswer`, peerId, answer);
+  };
+
+  const handlePeerIce = async (myId, candidate, peerId) => {
+      if (!candidate) {
+        return;
+      }
+      await peerConnection.addIceCandidate(candidate);
+  };
+  const init =  () => {
+    initSocket();
+
+    
 
     window.setup = () => {
       createCanvas(canvasWidth,canvasHeight);
@@ -80,12 +117,7 @@ import Pipe from './classes/Pipe.js';
         pipes[i].checkHit(face);
         checkScore(pipes[i]);
       }
-
-
       addPipe();
-
-
-
     }
 
     window.keyPressed = () => {

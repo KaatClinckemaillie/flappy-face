@@ -7,22 +7,43 @@
   <title>Controller Flappy Face</title>
 </head>
 <body>
-  <video id="video" autoplay playsinline></video>
+  <video id="myCamera" autoplay playsinline></video>
+  <label for="peerSelect">Peer:</label><select id="peerSelect"></select>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.7.2/simplepeer.min.js"
+    integrity="sha512-RZlErEuUwWv3EhGNhvni9vinu0QPwNU0OyWAlhTeezEToTZu/C+/Mn7ItRFmpcf8MTK0J2kRalSfzrpQqF7wJQ=="
+    crossorigin="anonymous"></script>
   <script>
     {
 
-    let socket, targetSocketId;
-    const $video = document.getElementById('video');
+    let socket, targetSocketId, myStream, peerConnection;
+
+    const $myCamera = document.getElementById('myCamera');
+    const $peerSelect = document.getElementById('peerSelect');
+
+    const servers = {
+      iceServers: [{
+        urls: 'stun:stun.l.google.com:19302'
+      }]
+    };
 
     const init = async () => {
-      const constraints = {
-        audio: false,
-        video: true
-      };
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      $video.srcObject=stream;
       
+      initSocket();
+      $peerSelect.addEventListener('input', callSelectedPeer);
+
+      const constraints = {audio: false, video: { width: 300, height: 300 } };
+      myStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      $myCamera.srcObject = myStream;
+      $myCamera.onloadedmetadata = () => $myCamera.play();
+
+      window.addEventListener('click', e => handleClick(e))
+      window.addEventListener('touchend', e => handleTouch(e))
+      //window.addEventListener('devicemotion', e => handleTouch(e))
+    };
+
+    const initSocket = () => {
       targetSocketId = getUrlParameter(`id`);
       if (!targetSocketId) {
         alert(`Missing target ID in querystring`);
@@ -32,14 +53,20 @@
       socket.on('connect', () => {
         console.log(`Connected: ${socket.id}`);
       });
+      socket.on('clients', updatePeerList);
 
-      
+      socket.on('peerAnswer', async (myId, answer, peerId) => {
+        console.log('Received peerAnswer from ${peerId}');
+        console.log(answer);
+        await handlePeerAnswer(myId, answer, peerId);
+      });
 
-      window.addEventListener('click', e => handleClick(e))
-      window.addEventListener('touchend', e => handleTouch(e))
-      //window.addEventListener('devicemotion', e => handleTouch(e))
-    };
+      socket.on('peerIce', async (myId, candidate, peerId) => {
+        console.log(`Received peerIce from ${peerId}`, candidate);
+        await handlePeerIce(myId, candidate, peerId);
+      });
 
+    }
     const handleClick = (e) => {
       e.preventDefault();
       socket.emit(`click`, 'yes!');
@@ -49,6 +76,51 @@
       e.preventDefault();
       socket.emit(`click`, 'yes!');
     }
+    const handlePeerIce = async (myId, candidate, peerId) => {
+      if (!candidate) {
+        return;
+      }
+      await peerConnection.addIceCandidate(candidate);
+    };
+    const handlePeerAnswer = async (myId, answer, peerId) => {
+          await peerConnection.setRemoteDescription(answer);
+    };
+    
+    const updatePeerList = (clients) => {
+      $peerSelect.innerHTML = '<option value="none">--- Select Peer To Call ---</option>';
+      for (const clientId in clients) {
+        const isMyOwnId = (clientId === socket.id);
+        if (clients.hasOwnProperty(clientId) && !isMyOwnId) {
+/*           const client = clients[clientId];
+          const $option = document.createElement('option');
+          $option.value = clientId;
+          $option.textContent = clientId;
+          $peerSelect.appendChild($option); */
+          console.log(`call selected peer met peer id: ${clientId}`);
+          callPeer(clientId);
+        }
+      }
+    };
+
+    const callPeer = async (peerId) => {
+      peerConnection = new RTCPeerConnection(servers);
+      // add the video stream
+      for (const track of myStream.getTracks()) {
+        peerConnection.addTrack(track, myStream);
+      }
+      peerConnection.onicecandidate = (e) => {
+        console.log('ice candidate', e.candidate);
+        socket.emit('peerIce', peerId, e.candidate);
+      };
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      socket.emit('peerOffer', peerId, offer);
+    };
+
+    const callSelectedPeer = async () => {
+      console.log('call selected peer', $peerSelect.value);
+      callPeer($peerSelect.value);
+    };
 
 /*     const handleDeviceMotion = (e) => {
       e.preventDefault();
