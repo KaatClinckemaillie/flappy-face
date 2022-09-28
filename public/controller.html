@@ -4,10 +4,23 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee+Spice&family=Montserrat&display=swap" rel="stylesheet">
   <title>Controller Flappy Face</title>
 </head>
 <body>
-  <video id="myCamera" autoplay playsinline></video>
+  <main class="container__mobile">
+    <video id="myCamera" autoplay playsinline></video>
+    <button class="startButton">Start</button>
+    <button class="pictureButton hide">Take picture</button>
+    <p class="controller__text hide">Shake your phone to go up!</p>
+    <button class="pauseButton hide">Pauze game</button>
+
+    <button class="jump hide">Jump</button>
+  </main>
   <script src="/socket.io/socket.io.js"></script>
   <script>
     {
@@ -16,6 +29,14 @@
 
     const $myCamera = document.getElementById('myCamera');
     const $peerSelect = document.getElementById('peerSelect');
+    const $pictureButton = document.querySelector('.pictureButton');
+    const $jumpButton = document.querySelector('.jump');
+    const $startButton = document.querySelector('.startButton');
+
+    const $pauseButton = document.querySelector('.pauseButton');
+    const $text = document.querySelector('.controller__text');
+    let paused = false;
+    let photos = false;
 
     const servers = {
       iceServers: [{
@@ -24,20 +45,46 @@
     };
 
     const init = async () => {
-      
       initSocket();
 
       const constraints = {audio: false, video: { width: 300, height: 300 } };
       myStream = await navigator.mediaDevices.getUserMedia(constraints);
+      
 
       $myCamera.srcObject = myStream;
       $myCamera.onloadedmetadata = () => $myCamera.play();
 
-      window.addEventListener('click', e => handleClick(e))
-      window.addEventListener('touchend', e => handleTouch(e))
-      //window.addEventListener('devicemotion', e => handleTouch(e))
-    };
+      $jumpButton.addEventListener('click', e => handleClick(e));
+      $jumpButton.addEventListener('touchend', e => handleTouch(e));
 
+      $pictureButton.addEventListener('click', e=> handleClickPicture(e));
+      $startButton.addEventListener('click', (e)=> handleClickStart(e));
+
+      $pauseButton.addEventListener('click', (e) => handlePause(e));
+      
+      
+    };
+    
+
+    const handlePause = (e) => {
+      e.preventDefault();
+      console.log('pause')
+      paused = !paused;
+      if(paused) {
+        $pauseButton.innerHTML = 'Play again';
+      }else {
+        $pauseButton.innerHTML = 'Pauze game';
+      }
+      socket.emit('pause');
+    }
+
+    const handleClickStart = (e) => {
+      e.preventDefault();
+      callPeer(targetSocketId);
+      $startButton.classList.add('hide');
+      $pictureButton.classList.remove('hide');
+      socket.emit('start')
+    }
     const initSocket = () => {
       targetSocketId = getUrlParameter(`id`);
       if (!targetSocketId) {
@@ -48,11 +95,8 @@
       socket.on('connect', () => {
         console.log(`Connected: ${socket.id}`);
       });
-      socket.on('clients', selectPeer);
 
       socket.on('peerAnswer', async (myId, answer, peerId) => {
-        console.log('Received peerAnswer from ${peerId}');
-        console.log(answer);
         await handlePeerAnswer(myId, answer, peerId);
       });
 
@@ -61,14 +105,43 @@
         await handlePeerIce(myId, candidate, peerId);
       });
 
+      socket.on('stopVideo', () => {
+        console.log('stopvideo');
+
+        photos = true;
+        $pictureButton.classList.add('hide');
+        $jumpButton.classList.remove('hide');
+        
+
+        $myCamera.pause();
+        myStream.getTracks().forEach(track => track.stop());
+        $myCamera.srcObject = myStream;
+        $text.classList.remove('hide');
+        $pauseButton.classList.remove('hide');
+
+      })
+
+      socket.on('gameOver', () => {
+        console.log('gameover')
+        $restartButton.classList.remove('hide');
+      })
+
     }
     const handleClick = (e) => {
       e.preventDefault();
+      console.log('click')
       socket.emit(`click`, 'yes!');
     }
 
-    const handleTouch = (e) => {
+    const handleClickPicture = (e) => {
       e.preventDefault();
+      console.log('click')
+      socket.emit('takePicture');
+    }
+
+    const handleMotion = (e) => {
+      e.preventDefault();
+      console.log(e);
       socket.emit(`click`, 'yes!');
     }
     const handlePeerIce = async (myId, candidate, peerId) => {
@@ -77,20 +150,21 @@
       }
       await peerConnection.addIceCandidate(candidate);
     };
+
     const handlePeerAnswer = async (myId, answer, peerId) => {
-          await peerConnection.setRemoteDescription(answer);
+      await peerConnection.setRemoteDescription(answer);
     };
     
-    const selectPeer = (clients) => {
+      const selectPeer = (clients) => {
+      console.log(clients);
       for (const clientId in clients) {
         const isMyOwnId = (clientId === socket.id);
         if (clients.hasOwnProperty(clientId) && !isMyOwnId) {
           console.log(`call selected peer met peer id: ${clientId}`);
           callPeer(clientId);
-          // nog sturen naar de receiver (script.js) dat het verbonden is
         }
-      }
-    };
+      } 
+    }; 
 
     const callPeer = async (peerId) => {
       peerConnection = new RTCPeerConnection(servers);
@@ -106,14 +180,7 @@
       await peerConnection.setLocalDescription(offer);
       socket.emit('peerOffer', peerId, offer);
     };
-
-
-
-/*     const handleDeviceMotion = (e) => {
-      e.preventDefault();
-      console.log(e)
-      //socket.emit(`click`, 'yes!');
-    } */
+ 
 
     const getUrlParameter = name => {
       name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');

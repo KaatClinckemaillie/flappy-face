@@ -4,42 +4,41 @@ class Pipe {
   constructor(canvasHeight) {
     this.x = width ;
 
-    this.space = 150;
+    this.space = 250;
     this.stop = random(50, 300);
 
-    this.canvasHeight = 480;
+    this.canvasHeight = 600;
     
     this.gameOver = false;
     this.score = false;
   }
 
   show() {
-    rect(this.x, 0, 30, this.stop);
-    rect(this.x, this.stop + this.space, 30, this.canvasHeight - (this.stop + this.space));  
+    fill('#4cbb17')
+    rect(this.x, 0, 60, this.stop);
+    rect(this.x, this.stop + this.space, 60, this.canvasHeight - (this.stop + this.space));  
   }
 
   update() {
-    this.x = this.x -1;
+    this.x = this.x -2;
 
   }
 
   checkHit(face) {
     
-    if(face.x <  this.x + 30 && face.x + 30 > this.x) {
-      if(face.y > this.stop + this.space || face.y < this.stop){
+    if(face.x <  this.x + 60 && face.x > this.x + 40) {
+      if(face.y + 100 > this.stop + this.space || face.y < this.stop){
         fill('red');
         this.gameOver = true;
-      }else   {
-        fill('red');
       }
-    } else if(face.x === this.x + 30){
+    } else if(face.x === this.x + 40){
         this.score = true;
     } else {
       fill('white');
       this.score = false;
-    } 
+    }
 
-    }   
+    } 
   }
 
   

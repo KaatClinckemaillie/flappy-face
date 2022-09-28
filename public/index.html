@@ -10,17 +10,32 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"
     integrity="sha512-rCZdHNB0AePry6kAnKAVFMRfWPmUXSo+/vlGtrOUvhsxD0Punm/xWbEh+8vppPIOzKB9xnk42yCRZ5MD/jvvjQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Spice&family=Montserrat&display=swap" rel="stylesheet">
   <title>Flappy Face</title>
 
 </head>
 
-<body class="container">
+<body class="body__desktop">
   <script src="/socket.io/socket.io.min.js"></script>
   <script type=module src="js/script.js"></script>
-  <main>
-    <div class="url"></div>
-    <video id="otherCamera" playsinline autoplay muted></video>
-    <canvas class="canvas" width="300" height="300"> </canvas>
+  <main class="container">
+    <h1 class="title">Flappy Face</h1>
+
+    <div class="text">
+      <p class="todo">Scan the QR-code and start the game!</p>
+      
+      <div id="qr"></div>
+      <div class="url"></div>
+    </div>
+
+    <video class="video-hide" id="otherCamera" playsinline autoplay muted></video>
+    <canvas class="canvas hide" width="300" height="300"> </canvas>
+
   </main>
 </body>
 

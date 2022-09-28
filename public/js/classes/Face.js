@@ -1,22 +1,24 @@
 class Face {
   
-  constructor() {
+  constructor(canvasWidth, canvasHeight) {
     this.y = 200;
     this.x = 200;
 
-    this.canvasHeight = 480;
+    this.canvasHeight = canvasHeight;
+    this.canvasWidth = canvasWidth;
 
     this.gravity = 0.1;
     this.velocity = 0;
     this.lift = -3; 
-    this.size = 30;
+    this.size = 100;
+    this.img = '';
       
   }
 
-  show() {
+  show(img) {
 
-    rect(this.x, this.y, this.size, this.size)
-
+      image(img, this.x, this.y, this.size, this.size)
+    
   }
 
   update() {
@@ -39,7 +41,15 @@ class Face {
   hit() {
     fill('red')
   }
+  gameOver() {
+    this.size = 300;
+    this.x = this.canvasWidth / 2 - this.size/2;
+    this.y = this.canvasHeight / 2 - this.size/2;
+  }
 
+  restart() {
+
+  }
 }
 
 export default Face

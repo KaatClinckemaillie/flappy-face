@@ -33,6 +33,35 @@ io.on('connection', socket => {
     io.sockets.emit(`click`, 'yes!');
   })
 
+  socket.on('gameOver', ()=> {
+    console.log('gameOver');
+    io.sockets.emit('gameOver');
+  })
+
+  socket.on('takePicture', () => {
+    console.log('take picture');
+    io.sockets.emit('takePicture');
+  })
+
+  socket.on('stopVideo', () => {
+    console.log('stopVideo');
+    io.sockets.emit('stopVideo');
+  })
+
+  socket.on('restart', () => {
+    console.log('restart');
+    io.sockets.emit('restart')
+  })
+  
+  socket.on('pause', () => {
+    console.log('pause');
+    io.sockets.emit('pause')
+  })
+  socket.on('start', () => {
+    console.log('start');
+    io.sockets.emit('start');
+  })
+
   socket.on('disconnect', () => {
     delete clients[socket.id];
     io.emit('clients', clients);
@@ -51,7 +80,9 @@ io.on('connection', socket => {
   socket.on('peerIce', (peerId, candidate) => {
     console.log(`Received peerIce from ${socket.id} to ${peerId}`);
     io.to(peerId).emit('peerIce', peerId, candidate, socket.id);
-  });
+  }); 
+
+
 
   io.emit('clients', clients);
 })
